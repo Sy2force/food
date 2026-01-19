@@ -49,6 +49,52 @@ const Explore = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState('posts'); // 'posts' or 'cards'
 
+  // Mock data for initial render or fallback
+  const mockPosts = [
+    {
+      _id: '1',
+      description:
+        'Délicieux pain Challah fait maison pour Shabbat. Une recette de ma grand-mère transmise de génération en génération. #Shabbat #Traditionnel',
+      photo: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=2942',
+      author: {
+        firstName: 'Sarah',
+        lastName: 'Cohen',
+        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=256',
+      },
+      likes: ['1', '2', '3'],
+      tags: ['Shabbat', 'Traditionnel', 'Pain'],
+      createdAt: new Date().toISOString(),
+    },
+    {
+      _id: '2',
+      description:
+        'Shakshuka épicée pour le petit-déjeuner. Le secret est dans les poivrons rôtis ! #PetitDejeuner #Piment',
+      photo: 'https://images.unsplash.com/photo-1590412200988-a436970781fa?q=80&w=2787',
+      author: {
+        firstName: 'David',
+        lastName: 'Levi',
+        avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=256',
+      },
+      likes: ['1', '2'],
+      tags: ['PetitDejeuner', 'Oeufs', 'Tomates'],
+      createdAt: new Date().toISOString(),
+    },
+    {
+      _id: '3',
+      description:
+        "Falafels croustillants avec tahini maison. Rien de tel qu'un bon repas de rue à la maison. #Vegan #StreetFood",
+      photo: 'https://images.unsplash.com/photo-1593252719532-347b6c86f1a6?q=80&w=2787',
+      author: {
+        firstName: 'Noa',
+        lastName: 'Ben-Ari',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256',
+      },
+      likes: ['1', '2', '3', '4', '5'],
+      tags: ['Vegan', 'StreetFood', 'Falafel'],
+      createdAt: new Date().toISOString(),
+    },
+  ];
+
   useEffect(() => {
     fetchContent();
   }, [selectedTags, activeTab]);
@@ -61,24 +107,17 @@ const Explore = () => {
           limit: 50,
           ...(selectedTags.length > 0 && { tags: selectedTags.join(',') }),
         };
-        try {
-          const response = await postAPI.getAll(params);
-          setPosts(
-            response.data.posts && response.data.posts.length > 0 ? response.data.posts : mockPosts
-          );
-        } catch (apiError) {
-          setPosts(mockPosts);
-        }
+        const response = await postAPI.getAll(params);
+        setPosts(response.data.posts || []);
       } else {
-        try {
-          const response = await cardAPI.getAll();
-          setCards(response.data || []);
-        } catch (apiError) {
-          setCards([]);
-        }
+        const response = await cardAPI.getAll();
+        setCards(response.data || []);
       }
     } catch (error) {
-      // Error loading content
+      console.error("Error fetching content", error);
+      // Handle error gracefully, possibly clear posts/cards
+      setPosts([]);
+      setCards([]);
     } finally {
       setLoading(false);
     }
